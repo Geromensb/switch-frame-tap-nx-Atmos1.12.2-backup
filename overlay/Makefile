@@ -38,7 +38,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #   NACP building is skipped as well.
 #---------------------------------------------------------------------------------
 
-APP_TITLE			:=		Switch Frame Tap
+APP_TITLE			:=		NX Duo Tap
 APP_VERSION 	:= 		0.7.22
 
 TARGET		:=	switch-frame-tap

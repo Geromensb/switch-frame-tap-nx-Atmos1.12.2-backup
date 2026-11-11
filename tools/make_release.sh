@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Build every Switch-side piece and pack the SD-card zip for a release:
 #
-#   bash tools/make_release.sh 0.1.0      -> dist/switch-frame-tap-0.1.0-switch.zip
+#   bash tools/make_release.sh 0.1.0      -> dist/nx-duo-tap-0.1.0-switch.zip
 #
 # The zip unpacks onto the root of the SD card. It carries no config.ini, so
 # an update never overwrites the user's settings (the sysmodule's defaults
@@ -57,7 +57,7 @@ mkdir -p "$STAGE/atmosphere/contents/0100000000000C21/flags"
 : > "$STAGE/atmosphere/contents/0100000000000C21/flags/boot2.flag"
 cat > "$STAGE/atmosphere/contents/0100000000000C21/toolbox.json" <<JSON
 {
-    "name": "Switch Frame Tap",
+    "name": "NX Duo Tap",
     "tid": "0100000000000C21",
     "requires_reboot": true
 }
@@ -72,7 +72,7 @@ mkdir -p "$STAGE/config/switch-frame-tap/dvr-patches"
 cp "$REPO"/third_party/dvr-patches/*.ips "$REPO/third_party/dvr-patches/LICENSE" "$STAGE/config/switch-frame-tap/dvr-patches/"
 cp "$REPO/third_party/dvr-patches/README.md" "$STAGE/config/switch-frame-tap/dvr-patches/README.txt"
 
-ZIP="$OUT/switch-frame-tap-$VER-switch.zip"
+ZIP="$OUT/nx-duo-tap-$VER-switch.zip"
 rm -f "$ZIP"
 (cd "$STAGE" && zip -qr "$ZIP" atmosphere switch config)
 rm -rf "$STAGE"

@@ -44,8 +44,8 @@ DATA		:=	data
 INCLUDES	:=	include
 ROMFS		:=
 
-APP_TITLE   := Switch Frame Tap
-APP_AUTHOR  := TomasUribe
+APP_TITLE   := NX Duo Tap
+APP_AUTHOR  := TestPilotX
 APP_VERSION := 0.7.22
 ICON        := icon.jpg
 

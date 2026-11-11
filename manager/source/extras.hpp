@@ -71,7 +71,7 @@ namespace extras {
         curl_slist *hdr = curl_slist_append(nullptr, "Accept: application/vnd.github+json");
         curl_easy_setopt(c, CURLOPT_URL, url);
         curl_easy_setopt(c, CURLOPT_HTTPHEADER, hdr);
-        curl_easy_setopt(c, CURLOPT_USERAGENT, "switch-frame-tap-manager");
+        curl_easy_setopt(c, CURLOPT_USERAGENT, "nx-duo-tap-manager");
         curl_easy_setopt(c, CURLOPT_FOLLOWLOCATION, 1L);
         curl_easy_setopt(c, CURLOPT_FAILONERROR, 1L);
         curl_easy_setopt(c, CURLOPT_CONNECTTIMEOUT, 15L);
@@ -302,7 +302,7 @@ namespace extras {
      * use (this app, the running sysmodule) are replaced on the card; the
      * console runs the new ones after a restart. */
 
-    constexpr const char *SelfRepo = "TomasUribe/switch-frame-tap";
+    constexpr const char *SelfRepo = "TestPilotX-Dev/nx-duo-tap";
 
     inline bool SelfAsset(const char *n) { return EndsWith(n, "-switch.zip"); }
 
@@ -327,7 +327,7 @@ namespace extras {
         FILE *f = std::fopen(tmp.c_str(), "wb");
         if (f == nullptr) { *err = "could not write to the SD card"; return false; }
         char what[96];
-        std::snprintf(what, sizeof(what), "Downloading Switch Frame Tap %s", rel.tag.c_str());
+        std::snprintf(what, sizeof(what), "Downloading NX Duo Tap %s", rel.tag.c_str());
         const bool got = Get(rel.url.c_str(), nullptr, f, &p, what, err);
         std::fclose(f);
         if (!got) { std::remove(tmp.c_str()); return false; }
@@ -336,7 +336,7 @@ namespace extras {
         std::remove(tmp.c_str());
         if (ok) {
             char b[160];
-            std::snprintf(b, sizeof(b), "Switch Frame Tap %s installed (%d files) - restart the console to finish", rel.tag.c_str(), written);
+            std::snprintf(b, sizeof(b), "NX Duo Tap %s installed (%d files) - restart the console to finish", rel.tag.c_str(), written);
             *done = b;
         }
         return ok;

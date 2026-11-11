@@ -144,7 +144,7 @@ static int AppendOthers(FsFileSystem *sd, char *text, size_t cap) {
             if (R_SUCCEEDED(svcGetInfo(&used, InfoType_UsedMemorySize, h, 0))) {
                 o[no].id = out.program_id;
                 o[no].bytes = used;
-                if (out.program_id == SFT_TID) { snprintf(o[no].name, sizeof(o[no].name), "Switch Frame Tap"); }
+                if (out.program_id == SFT_TID) { snprintf(o[no].name, sizeof(o[no].name), "NX Duo Tap"); }
                 else { ToolboxName(sd, out.program_id, o[no].name, sizeof(o[no].name)); }
                 ++no;
             }

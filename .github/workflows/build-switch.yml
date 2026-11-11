@@ -1,0 +1,106 @@
+# NX Duo Tap: build the Switch side (sysmodule, launcher, overlay, manager)
+# against a chosen Atmosphère release and pack the same SD-card zip as
+# tools/make_release.sh. The sysmodule links libstratosphere, so a new
+# firmware or Atmosphère release usually needs only a rebuild here.
+#
+# Run it from the Actions tab (or `gh workflow run build-switch.yml`):
+#   version     -> must match the version strings in the sources (e.g. 0.7.22-duo1)
+#   atmosphere  -> Atmosphère tag to build against (e.g. 1.12.2)
+#   release     -> also publish a GitHub release with the zip (GPL-2.0: the
+#                  matching source is this commit of this public repository)
+name: NX Duo Tap · Switch build
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Versión del zip (debe coincidir con las cadenas del código), p. ej. 0.7.22-duo1"
+        required: true
+      atmosphere:
+        description: "Tag de Atmosphère contra el que se compila, p. ej. 1.12.2"
+        required: true
+        default: "1.12.2"
+      libnx:
+        description: "Rama, tag o commit de libnx (un Atmosphère nuevo suele necesitar libnx de su código fuente)"
+        required: true
+        default: "master"
+      release:
+        description: "Publicar una release con el zip"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  switch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Atmosphère ${{ inputs.atmosphere }}
+        run: git clone --depth 1 --branch "${{ inputs.atmosphere }}" https://github.com/Atmosphere-NX/Atmosphere "ref/Atmosphere-${{ inputs.atmosphere }}"
+
+      - name: libtesla (overlay)
+        run: git clone --depth 1 https://github.com/WerWolv/libtesla ref/libtesla
+
+      # A new Atmosphère's libstratosphere can call libnx APIs newer than the
+      # devkitPro image ships (1.12.2 needs fsStorageForBatchRead*): build that
+      # libnx from source into a derived image for the sysmodule only.
+      - name: libnx ${{ inputs.libnx }} image
+        run: |
+          git clone https://github.com/switchbrew/libnx ref/libnx
+          git -C ref/libnx checkout "${{ inputs.libnx }}"
+          git -C ref/libnx log -1 --format='libnx %H %cd %s'
+          cat > ref/Dockerfile.libnx <<'DOCKER'
+          FROM devkitpro/devkita64:latest
+          COPY libnx /tmp/libnx
+          RUN bash -lc 'cd /tmp/libnx && make -j4 && make install' && rm -rf /tmp/libnx
+          DOCKER
+          docker build -t nx-duo-tap/devkita64-libnx -f ref/Dockerfile.libnx ref
+
+      # make_release.sh hides the sysmodule build output: build it here first
+      # with the log visible (the release step then reuses these objects).
+      - name: Build sysmodule (visible log)
+        env:
+          AMS_TREE: ref/Atmosphere-${{ inputs.atmosphere }}
+          DKP_IMG: nx-duo-tap/devkita64-libnx
+          MAKEFLAGS: -j4
+        run: bash tier4/applet-mitm/build.sh
+
+      - name: Build and pack (tools/make_release.sh)
+        env:
+          AMS_TREE: ref/Atmosphere-${{ inputs.atmosphere }}
+          DKP_IMG: nx-duo-tap/devkita64-libnx
+          MAKEFLAGS: -j4
+        run: bash tools/make_release.sh "${{ inputs.version }}"
+
+      - name: SHA-256 and debug symbols
+        run: |
+          cd dist
+          sha256sum "nx-duo-tap-${{ inputs.version }}-switch.zip" | tee SHA256SUMS
+          # The sysmodule's ELF maps a crash report's PC back to a source line.
+          find "../ref/Atmosphere-${{ inputs.atmosphere }}/stratosphere/applet-mitm/out" -name '*.elf' -exec cp {} . \; || true
+          find ../tier4/donor -maxdepth 2 -name '*.elf' -exec cp {} . \; || true
+          ls -la
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nx-duo-tap-${{ inputs.version }}-ams-${{ inputs.atmosphere }}
+          path: |
+            dist/nx-duo-tap-${{ inputs.version }}-switch.zip
+            dist/SHA256SUMS
+            dist/*.elf
+          if-no-files-found: error
+
+      - name: Release
+        if: ${{ inputs.release }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v${{ inputs.version }}" \
+            "dist/nx-duo-tap-${{ inputs.version }}-switch.zip" dist/SHA256SUMS \
+            --target "${{ github.sha }}" \
+            --title "v${{ inputs.version }} (Atmosphère ${{ inputs.atmosphere }})" \
+            --notes "NX Duo Tap ${{ inputs.version }}, compilado contra Atmosphère ${{ inputs.atmosphere }} por TestPilotX para NX Duo. Código fuente: este commit de este repositorio (GPL-2.0). Proyecto original: https://github.com/TomasUribe/switch-frame-tap"

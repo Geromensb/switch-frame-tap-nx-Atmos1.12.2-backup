@@ -58,3 +58,12 @@ tier4/applet-mitm/source/applet_mitm_nv.cpp (FindLibnxNvMaps) and
 applet_mitm_audout.cpp rely on libnx's data layouts (ISC): struct NvMap
 (nvidia/map.h) and AudioOutBuffer plus the audout:u commands
 (services/audout.h). Only the layouts are used; no libnx code is copied.
+
+
+NX Duo Tap
+----------
+NX Duo Tap is a modified version of switch-frame-tap by Tomas Uribe,
+maintained by TestPilotX since 2026-11-11 for NX Duo (NX Paradox).
+Modifications Copyright (C) 2026 TestPilotX, under the same GPL-2.0 terms.
+Every change to the original files is recorded, with its date, in the git
+history of https://github.com/TestPilotX-Dev/nx-duo-tap.

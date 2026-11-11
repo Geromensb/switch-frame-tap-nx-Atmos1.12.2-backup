@@ -41,7 +41,7 @@
 
 namespace {
 
-    constexpr const char *AppVersion  = "0.7.22";
+    constexpr const char *AppVersion  = "0.7.22-duo1";
     constexpr u64 ModuleTid           = 0x0100000000000C20ull;
     constexpr const char *ModuleDir   = "sdmc:/atmosphere/contents/0100000000000C20";
     constexpr const char *ModuleNsp   = "sdmc:/atmosphere/contents/0100000000000C20/exefs.nsp";
@@ -997,9 +997,9 @@ namespace {
             {
                 Page p{ "About", {} };
                 p.rows.push_back(Info("Version", [] { return std::string(AppVersion); }, nullptr,
-                    "Switch Frame Tap - native 1080p60 game streaming to a PC, over USB or the network."));
-                p.rows.push_back(Info("Source code", [] { return std::string("github.com/TomasUribe/switch-frame-tap"); }, nullptr,
-                    "Free and open source (GPL-2.0). Bug reports and ideas: the GitHub issues, or the GBAtemp thread."));
+                    "NX Duo Tap - the Switch side of NX Duo. Based on Switch Frame Tap by Tomas Uribe."));
+                p.rows.push_back(Info("Source code", [] { return std::string("github.com/TestPilotX-Dev/nx-duo-tap"); }, nullptr,
+                    "Free and open source (GPL-2.0), based on github.com/TomasUribe/switch-frame-tap. Help: NX Paradox support."));
                 p.rows.push_back(Info("If something goes wrong", [] { return std::string("Hold Volume Up at boot"); }, nullptr,
                     "Holding Volume Up while Atmosphere boots skips all sysmodules. Or turn off \"Start with the console\" on the "
                     "Home page, or delete atmosphere/contents/0100000000000C20 and 0100000000000C21 on a PC."));
@@ -1154,7 +1154,7 @@ namespace {
     void DrawSidebar(App &a) {
         ui::Fill(0, 0, SideW, ui::H, ui::Surf);
         ui::Logo(26, 30, 40);
-        ui::Text("Switch Frame Tap", 100, 26, ui::Label, ui::Ink);
+        ui::Text("NX Duo Tap", 100, 26, ui::Label, ui::Ink);
         ui::Text(std::string("v") + AppVersion, 100, 54, ui::Small, ui::Faint);
         for (int i = 0; i < static_cast<int>(a.pages.size()); ++i) {
             const int y = NavY + i * NavStep;
@@ -1522,7 +1522,7 @@ namespace {
     void RunUpdate(App &app, PadState &pad, int mode) {
         const char *title = mode == 1 ? "Check for updates" : "Update";
         auto draw = [title](const char *what, double frac) {
-            DrawProgressCard(title, "Switch Frame Tap", what, frac, "From this project's GitHub releases");
+            DrawProgressCard(title, "NX Duo Tap", what, frac, "From this project's GitHub releases");
             DrawHints({ { "\uE0A1", 'B', "Cancel" } }, 0);
             SDL_RenderPresent(ui::g_ren);
         };
@@ -1597,7 +1597,7 @@ int main(int, char **) {
     SDL_Init(SDL_INIT_VIDEO);
     TTF_Init();
     IMG_Init(IMG_INIT_PNG);
-    SDL_Window *win = SDL_CreateWindow("Switch Frame Tap", 0, 0, ui::W, ui::H, 0);
+    SDL_Window *win = SDL_CreateWindow("NX Duo Tap", 0, 0, ui::W, ui::H, 0);
     ui::g_ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     SDL_SetRenderDrawBlendMode(ui::g_ren, SDL_BLENDMODE_BLEND);
 
