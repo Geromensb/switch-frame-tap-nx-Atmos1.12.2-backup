@@ -1,0 +1,25 @@
+build/
+*.nsp
+*.nso
+*.npdm
+*.elf
+*.map
+*.lst
+
+# ref/ is third-party reference material - see ref/README.md.
+# Each tree has its own license and upstream; none of it is redistributed here.
+ref/*
+!ref/README.md
+
+# compiled PC-side receiver (build it with the one-liner in its README)
+tools/raw-recv/raw-recv
+tools/nvsetup-dump
+
+# host-side tool bytecode
+__pycache__/
+*.ovl
+*.nacp
+dist/
+tools/raw-recv/clarity.o
+tools/raw-recv/clarity_shader.h
+*.nro

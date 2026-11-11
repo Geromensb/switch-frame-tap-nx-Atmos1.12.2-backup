@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.TomasUribe.SwitchFrameTap</id>
+  
+  <metadata_license>FSFAP</metadata_license>
+  
+  <project_license>GPL-2.0-only</project_license>
+  
+  <name>Switch Frame Tap</name>
+  <summary>Watch and record your Switch, streamed over USB or the network</summary>
+
+  <description>
+    <p>
+      The PC viewer for Switch Frame Tap: watch, play and record the game running on your Nintendo Switch, streamed with sound over a USB-C cable or the network at the game's own resolution and 60 fps.
+    </p>
+    <p>
+      It needs a Switch running Atmosphère with the Switch Frame Tap sysmodule installed. The viewer decodes on the GPU (VAAPI or NVDEC), records MP4 and takes native-resolution screenshots, with optional FSR 1 and NIS upscaling.
+    </p>
+    <p>
+      USB needs the udev rule from the project page installed once on the host.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">io.github.TomasUribe.SwitchFrameTap.desktop</launchable>
+
+  <url type="homepage">https://github.com/TomasUribe/switch-frame-tap</url>
+  <url type="bugtracker">https://github.com/TomasUribe/switch-frame-tap/issues</url>
+  <url type="donation">https://buymeacoffee.com/papux200</url>
+
+  <developer id="io.github.TomasUribe">
+    <name>Tomas Uribe</name>
+  </developer>
+
+  <provides>
+    <binary>switch-frame-tap-viewer</binary>
+  </provides>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>A Switch game streamed to a PC over USB</caption>
+      <image>https://raw.githubusercontent.com/TomasUribe/switch-frame-tap/master/docs/hero-switch-to-pc.jpg</image>
+    </screenshot>
+  </screenshots>
+
+  <content_rating type="oars-1.1"/>
+  
+  <releases>
+    <release version="0.7.22" date="2026-11-10">
+      <description>
+        <ul>
+          <li>The menus no longer wait for vsync (much snappier on Wayland with NVIDIA), and a saved "Vsync off" applies from the start.</li>
+          <li>On the console: fewer stutters while games load, sound on the HOME menu, and a vanished network viewer ends the stream within 4 s.</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.21.1" date="2026-11-03">
+      <description>
+        <ul>
+          <li>SwitchU: a game started from its menu streams from its first frame.</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.21" date="2026-11-03">
+      <description>
+        <ul>
+          <li>SwitchU support: with SwitchU as the HOME menu, its menu streams from boot and HOME and back work while streaming.</li>
+          <li>Final Fantasy XII in handheld streams full size, and games that draw in X8R8G8B8 get the right colours.</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.20" date="2026-11-01">
+      <description>
+        <ul>
+          <li>Play the Switch from the viewer with a controller, the keyboard or the mouse (off by default), with a Controller menu for remapping.</li>
+          <li>The buttons over the picture fade out after 3 s without mouse movement; Alt-drag, Ctrl-wheel and Ctrl-click move and zoom the picture in fullscreen.</li>
+          <li>Faster streams in heavy scenes, and fixes for red pictures, stutters and missing sound in some games.</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.19" date="2026-10-25">
+      <description>
+        <ul>
+          <li>One file per recording is a setting now, off by default: recordings start a new file when the picture size changes and are never scaled.</li>
+          <li>No empty 0-second file when the picture size changes right as a recording starts.</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.18.1" date="2026-10-25">
+      <description>
+        <p>Viewer unchanged; the Switch side lets homebrew from forwarders run in docked mode.</p>
+      </description>
+    </release>
+    <release version="0.7.18" date="2026-10-25">
+      <description>
+        <ul>
+          <li>Recordings stay one file: while the viewer records, the Switch keeps the picture at the size the recording started at.</li>
+          <li>Over USB the viewer repeats a request the Switch was not listening for yet.</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.17" date="2026-10-24">
+      <description>
+        <ul>
+          <li>A pin button keeps the window on top of others.</li>
+          <li>Over the network the viewer reconnects by itself after the Switch restarts or changes network, and waits calmly when another viewer already has the Switch.</li>
+          <li>Network viewers say why there is no picture, as USB viewers already did.</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.16" date="2026-10-24">
+      <description>
+        <ul>
+          <li>Games with dynamic resolution or a zoom in the middle of the picture (Super Mario Galaxy, Kingdom Hearts) are cropped and scaled by the viewer, sharper than on the console.</li>
+          <li>More games stream right: Super Mario 3D All-Stars, Sunshine, Doom 3 and Duke Nukem 3D; homebrew games stream their picture and sound.</li>
+          <li>The picture no longer goes black in a large window with sdl2-compat.</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.15" date="2026-10-24">
+      <description>
+        <ul>
+          <li>No latency spike every 3 seconds: the console writes nothing to its SD card while it streams.</li>
+          <li>The Album and System Settings stream again on firmware 23; the viewer says when the keyboard pauses the stream.</li>
+          <li>Native Wayland on KDE Plasma, and switch-frame-tap-viewer --check prints the session, drivers, udev rule, USB devices and network.</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.14" date="2026-10-22">
+      <description>
+        <ul>
+          <li>Stream the Switch's HOME menu and its overlays (volume bar, quick settings, power menu, Tesla/Ultrahand) - opt-in on the console.</li>
+          <li>Network streams show a picture right away when the viewer joins mid-game.</li>
+          <li>The viewer explains USB-C to USB-C cable trouble, and draws in software when no GPU driver works.</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.13.1" date="2026-10-18">
+      <description>
+        <ul>
+          <li>Fixed streaming stopping until a reboot after closing some homebrew apps.</li>
+          <li>Fullscreen on a screen that is not 16:9 now suggests a 16:9 mode.</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.7.13" date="2026-10-15">
+      <description>
+        <ul>
+          <li>Fixed black screen after launching many apps in a row.</li>
+          <li>Fixed boot crash on consoles with several sysmodules.</li>
+          <li>Super Mario Odyssey and similar games fill the stream in handheld instead of sitting in the top-left corner.</li>
+          <li>Uses much less system memory.</li>
+          <li>GPU decoding is on by default on Windows (D3D11VA) and Linux.</li>
+          <li>Smoother over Wi-Fi: the network stream sends a keyframe only every 4 s.</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>
