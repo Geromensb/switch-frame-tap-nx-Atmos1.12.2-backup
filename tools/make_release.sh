@@ -9,7 +9,7 @@
 set -e
 VER="${1:?usage: make_release.sh VERSION}"
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-IMG=devkitpro/devkita64:latest
+IMG="${DKP_IMG:-devkitpro/devkita64:latest}"
 OUT="$REPO/dist"
 STAGE="$OUT/stage-switch"
 
@@ -36,10 +36,10 @@ need tier4/applet-mitm/source/applet_mitm_main.cpp "applet-mitm v${VER//./\\.}: 
 echo "== sysmodule"
 MAKEFLAGS="${MAKEFLAGS:--j6}" bash "$REPO/tier4/applet-mitm/build.sh" >/dev/null
 echo "== memory donor"
-docker run --rm -u "$(id -u):$(id -g)" -v "$REPO":/w -w /w/tier4/donor "$IMG" bash -lc 'make' >/dev/null
+docker run --rm --security-opt label=disable -v "$REPO":/w -w /w/tier4/donor "$IMG" bash -lc 'make' >/dev/null
 echo "== overlay and manager"
 for d in overlay manager; do
-    docker run --rm -u "$(id -u):$(id -g)" -v "$REPO":/w -w "/w/$d" "$IMG" bash -lc 'make -j8' >/dev/null
+    docker run --rm --security-opt label=disable -v "$REPO":/w -w "/w/$d" "$IMG" bash -lc 'make -j8' >/dev/null
 done
 
 rm -rf "$STAGE"

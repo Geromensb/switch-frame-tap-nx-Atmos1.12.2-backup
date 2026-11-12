@@ -14,7 +14,7 @@ UIDGID="$(id -u):$(id -g)"
 # rootless podman (also as "docker", podman-docker): the container's root IS
 # this user, so the files are ours already - a chown to our uid inside would
 # hand them to a sub-uid instead (permission denied on the next run)
-OWN() { docker run --rm -v "$AMS":/ams "$IMG" chown -R "$UIDGID" /ams/stratosphere/applet-mitm >/dev/null 2>&1 || true; }
+OWN() { docker run --rm --security-opt label=disable -v "$AMS":/ams "$IMG" chown -R "$UIDGID" /ams/stratosphere/applet-mitm >/dev/null 2>&1 || true; }
 if docker --version 2>/dev/null | grep -qi podman; then OWN() { :; }; fi
 
 mkdir -p "$DST"
@@ -32,15 +32,24 @@ rsync -rlpgoD --checksum --delete \
   "$SRC"/ "$DST"/
 
 set +e
-docker run --rm -e MAKEFLAGS="${MAKEFLAGS:--j$(nproc)}" -v "$AMS":/ams -w /ams/stratosphere/applet-mitm "$IMG" bash -lc 'make nx_release 2>&1'
+docker run --rm --security-opt label=disable -e MAKEFLAGS="${MAKEFLAGS:--j$(nproc)}" -v "$AMS":/ams -w /ams/stratosphere/applet-mitm "$IMG" bash -lc 'make nx_release 2>&1'
 rc=$?
 set -e
 
 OWN
-NSP="$(find "$DST/out" -name '*.nsp' | head -1)"
-[ -n "$NSP" ] && cp "$NSP" "$SRC/applet-mitm$TAG.nsp"
 
-if [ $rc -eq 0 ] && [ -f "$SRC/applet-mitm$TAG.nsp" ]; then
+if [ "$rc" -ne 0 ]; then
+  echo "BUILD FAILED (rc=$rc)"
+  exit "$rc"
+fi
+
+NSP="$(find "$DST/out" -name '*.nsp' -print -quit 2>/dev/null || true)"
+
+if [ -n "$NSP" ]; then
+  cp "$NSP" "$SRC/applet-mitm$TAG.nsp"
+fi
+
+if [ -f "$SRC/applet-mitm$TAG.nsp" ]; then
   ls -l "$SRC/applet-mitm$TAG.nsp"; echo OK
 else
   echo "BUILD FAILED (rc=$rc)"; exit 1
