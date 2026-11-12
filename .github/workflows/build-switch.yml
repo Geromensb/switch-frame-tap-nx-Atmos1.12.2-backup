@@ -4,8 +4,10 @@
 # firmware or Atmosphère release usually needs only a rebuild here.
 #
 # Run it from the Actions tab (or `gh workflow run build-switch.yml`):
-#   version     -> must match the version strings in the sources (e.g. 0.7.22-duo1)
+#   version     -> must match the version strings in the sources (e.g. 0.7.22-duo2)
 #   atmosphere  -> Atmosphère tag to build against (e.g. 1.12.2)
+#   libnx       -> libnx commit; pinned to the one the last good build used, so
+#                  a rebuild gives the same result (BUILDINFO records it)
 #   release     -> also publish a GitHub release with the zip (GPL-2.0: the
 #                  matching source is this commit of this public repository)
 name: NX Duo Tap · Switch build
@@ -14,16 +16,16 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Versión del zip (debe coincidir con las cadenas del código), p. ej. 0.7.22-duo1"
+        description: "Versión del zip (debe coincidir con las cadenas del código), p. ej. 0.7.22-duo2"
         required: true
       atmosphere:
         description: "Tag de Atmosphère contra el que se compila, p. ej. 1.12.2"
         required: true
         default: "1.12.2"
       libnx:
-        description: "Rama, tag o commit de libnx (un Atmosphère nuevo suele necesitar libnx de su código fuente)"
+        description: "Commit de libnx (fijo al de la última compilación buena; un Atmosphère nuevo puede pedir uno más reciente, p. ej. master)"
         required: true
-        default: "master"
+        default: "b156b4774fb2df7b93402169509266da7547fc4c"
       release:
         description: "Publicar una release con el zip"
         type: boolean
@@ -76,8 +78,17 @@ jobs:
           MAKEFLAGS: -j4
         run: bash tools/make_release.sh "${{ inputs.version }}"
 
-      - name: SHA-256 and debug symbols
+      - name: SHA-256, BUILDINFO and debug symbols
         run: |
+          {
+            echo "NX Duo Tap ${{ inputs.version }}"
+            echo "source       ${{ github.repository }}@${{ github.sha }}"
+            echo "atmosphere   ${{ inputs.atmosphere }} $(git -C "ref/Atmosphere-${{ inputs.atmosphere }}" rev-parse HEAD)"
+            echo "libnx        $(git -C ref/libnx rev-parse HEAD)"
+            echo "libtesla     $(git -C ref/libtesla rev-parse HEAD)"
+            echo "devkita64    $(docker image inspect devkitpro/devkita64:latest --format '{{index .RepoDigests 0}}' 2>/dev/null || echo unknown)"
+            echo "built        $(date -u +%Y-%m-%dT%H:%M:%SZ) run ${{ github.run_id }}"
+          } | tee dist/BUILDINFO
           cd dist
           sha256sum "nx-duo-tap-${{ inputs.version }}-switch.zip" | tee SHA256SUMS
           # The sysmodule's ELF maps a crash report's PC back to a source line.
@@ -91,6 +102,7 @@ jobs:
           path: |
             dist/nx-duo-tap-${{ inputs.version }}-switch.zip
             dist/SHA256SUMS
+            dist/BUILDINFO
             dist/*.elf
           if-no-files-found: error
 
@@ -100,7 +112,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "v${{ inputs.version }}" \
-            "dist/nx-duo-tap-${{ inputs.version }}-switch.zip" dist/SHA256SUMS \
+            "dist/nx-duo-tap-${{ inputs.version }}-switch.zip" dist/SHA256SUMS dist/BUILDINFO \
             --target "${{ github.sha }}" \
             --title "v${{ inputs.version }} (Atmosphère ${{ inputs.atmosphere }})" \
             --notes "NX Duo Tap ${{ inputs.version }}, compilado contra Atmosphère ${{ inputs.atmosphere }} por TestPilotX para NX Duo. Código fuente: este commit de este repositorio (GPL-2.0). Proyecto original: https://github.com/TomasUribe/switch-frame-tap"

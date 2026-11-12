@@ -48,6 +48,11 @@ extern "C" {
     u32           __nx_nv_transfermem_size = 0x40000;
 }
 
+/* NX Paradox: defined in libstratosphere's hos_version_api.cpp by
+ * patch_libstrat.py - true when the firmware's major.minor is newer than the
+ * Atmosphere this was built against (that gate used to abort at boot). */
+namespace ams::hos { bool Tier4IsUntestedFirmware(); }
+
 namespace ams {
 
     namespace {
@@ -1140,6 +1145,22 @@ namespace ams {
 
         mitm::applet::LogInit();
         if (!StartedInTime()) { return; }
+
+        /* NX Paradox: a firmware newer (major.minor) than the Atmosphere this
+         * was built against used to abort in __appInit, before this log was
+         * open - a fatal ~20 s after every boot (#83: 23.5.0, 1.12.0 builds).
+         * patch_libstrat.py made libstratosphere's gate a flag: the console
+         * runs as without Switch Frame Tap until a build for that firmware,
+         * unless allow_untested_firmware = 1 (to try it on that firmware). */
+        if (::ams::hos::Tier4IsUntestedFirmware()) {
+            const u32 hv = hosversionGet();
+            const bool anyway = ArmFileContains("anyfw");
+            mitm::applet::LogLine("firmware %u.%u.%u is newer than this build knows (built against Atmosphere %d.%d.%d) - %s",
+                                  HOSVER_MAJOR(hv), HOSVER_MINOR(hv), HOSVER_MICRO(hv),
+                                  ATMOSPHERE_RELEASE_VERSION_MAJOR, ATMOSPHERE_RELEASE_VERSION_MINOR, ATMOSPHERE_RELEASE_VERSION_MICRO,
+                                  anyway ? "starting anyway (allow_untested_firmware = 1)" : "not starting. allow_untested_firmware = 1 in config.ini overrides");
+            if (!anyway) { return; }
+        }
         LogAppletLimits("main start");
 
         /* M72: first thing, before any other work. With mitm.lst present every
@@ -1152,7 +1173,7 @@ namespace ams {
         /* M76: this line used to print jpg=off before jpg was parsed, and
          * called every build a "read-only observer". The flag dump below is
          * the record of what this boot armed. */
-        mitm::applet::LogLine("applet-mitm v0.7.22-duo1: up (grc IPC interceptor %s), built against Atmosphere %d.%d.%d",
+        mitm::applet::LogLine("applet-mitm v0.7.22-duo2: up (grc IPC interceptor %s), built against Atmosphere %d.%d.%d",
                               mitm::applet::g_grc_armed ? "ARMED" : "off",
                               ATMOSPHERE_RELEASE_VERSION_MAJOR, ATMOSPHERE_RELEASE_VERSION_MINOR, ATMOSPHERE_RELEASE_VERSION_MICRO);
         {

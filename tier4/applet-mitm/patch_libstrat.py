@@ -116,6 +116,34 @@ else:
     F3.write_text(src3.replace(old3, new3, 1))
     print("patch_libstrat: mitm request copy handles closed after forwarding (backport of Atmosphere b05166d50)")
 
+# NX Paradox: libstratosphere's version gate (hos_version_api.cpp,
+# AMS_ABORT_UNLESS(is_safely_tryable_version)) runs in __appInit, before main()
+# and before the log opens. A firmware whose major.minor is newer than the
+# Atmosphere this is built against aborted the module: 23.5.0 with the 1.12.0
+# builds (0.7.21.1, 0.7.22) was a fatal, std::abort in 0100000000000C20, ~20 s
+# after every boot (#83). A flag instead: Main logs it and exits, unless
+# allow_untested_firmware = 1 (applet_mitm_main.cpp). A .cpp, so a rewrite
+# rebuilds only that file.
+F4 = pathlib.Path(sys.argv[1]) / "libraries/libstratosphere/source/hos/hos_version_api.cpp"
+src4 = F4.read_text()
+MARK4 = "g_tier4_untested_firmware"
+if MARK4 in src4:
+    print("patch_libstrat: firmware version gate already a flag")
+else:
+    decl4 = "    bool IsUnitTestProgramForSetVersion();\n"
+    gate4 = "                AMS_ABORT_UNLESS(is_safely_tryable_version);\n"
+    assert src4.count(decl4) == 1, "hos_version_api: IsUnitTestProgramForSetVersion declaration not found"
+    assert src4.count(gate4) == 1, "hos_version_api: version gate AMS_ABORT_UNLESS not found"
+    src4 = src4.replace(decl4, decl4 + (
+        "\n"
+        "    /* tier4 patch: a firmware newer than this build's Atmosphere is a flag, not a fatal at boot */\n"
+        "    constinit bool g_tier4_untested_firmware = false;\n"
+        "    bool Tier4IsUntestedFirmware() { return g_tier4_untested_firmware; }\n"
+    ), 1)
+    src4 = src4.replace(gate4, "                g_tier4_untested_firmware = !is_safely_tryable_version;\n", 1)
+    F4.write_text(src4)
+    print("patch_libstrat: firmware version gate is a flag (ams::hos::Tier4IsUntestedFirmware), not an abort")
+
 # only when something changed: rewriting the header bumps its timestamp, and
 # make then rebuilds the whole of libstratosphere (30+ minutes)
 if src != orig:
